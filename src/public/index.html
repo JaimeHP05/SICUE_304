@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema SICUE</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Login Section -->
+    <div id="login-section" class="container">
+        <h2>Acceso al Sistema SICUE</h2>
+        <form id="login-form" class="login-form">
+            <input type="text" id="username" placeholder="Nombre de usuario" required>
+            <input type="password" id="password" placeholder="Contraseña" required>
+            <button type="submit" class="button">Iniciar Sesión</button>
+        </form>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="admin-dashboard" class="container hidden">
+        <button class="button logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+        <h2>Panel de Administrador</h2>
+        <button class="button" onclick="mostrarFormulario('convenio-form')">Crear Nuevo Convenio</button>
+        
+        <div id="convenio-form" class="hidden">
+            <h3>Crear Convenio</h3>
+            <form id="form-convenio">
+                <input type="text" id="uniDestino" placeholder="Universidad Destino" required>
+                <div id="asignaturas-container">
+                    <div class="asignatura-pair">
+                        <input type="text" placeholder="Asignatura Origen" required>
+                        <input type="text" placeholder="Asignatura Destino" required>
+                        <button type="button" class="button remove-pir" onclick="eliminarParAsignaturas(this)">
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+                <button type="button" class="button" onclick="agregarParAsignaturas()">
+                    Añadir Asignatura
+                </button>
+                <button type="submit" class="button">Guardar Convenio</button>
+            </form>
+        </div>
+
+        <div class="status-section">
+            <h3>Convenios Existentes</h3>
+            <table class="status-table">
+                <thead>
+                    <tr>
+                        <th>Universidad Destino</th>
+                        <th>Asignaturas</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="convenios-list"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Cambiar de estudiante-dashboard a student-dashboard -->
+    <div id="student-dashboard" class="container hidden">
+        <button class="button logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+        <h2>Panel de Estudiante</h2>
+        <div class="button-group">
+            <button class="button" onclick="mostrarFormulario('convalidacion-form')">Solicitar Convalidación</button>
+            <button class="button" onclick="mostrarFormulario('convenios-disponibles-estudiante')">Ver Convenios Disponibles</button>
+        </div>
+        
+        <div id="convalidacion-form" class="hidden">
+            <h3>Solicitar Convalidación</h3>
+            <form id="form-convalidacion">
+                <div class="form-group">
+                    <label for="uniDestinoEstudiante">Universidad de Destino:</label>
+                    <select id="uniDestinoEstudiante" required onchange="mostrarAsignaturasConvenio(this.value)">
+                        <option value="">Seleccione Universidad</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="duracionEstudiante">Duración:</label>
+                    <select id="duracionEstudiante" required>
+                        <option value="">Seleccione duración</option>
+                        <option value="primer_cuatrimestre">Primer cuatrimestre</option>
+                        <option value="segundo_cuatrimestre">Segundo cuatrimestre</option>
+                        <option value="curso_completo">Curso completo</option>
+                    </select>
+                </div>
+                <div id="asignaturas-info" class="hidden">
+                    <h4>Asignaturas incluidas en el convenio:</h4>
+                    <div class="asignaturas-list"></div>
+                </div>
+                <button type="submit" class="button">Enviar Solicitud</button>
+            </form>
+        </div>
+
+        <div class="status-section">
+            <h3>Mis Solicitudes</h3>
+            <table class="status-table">
+                <thead>
+                    <tr>
+                        <th>Universidad</th>
+                        <th>Duración</th>
+                        <th>Asignaturas</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="solicitudes-list-estudiante"></tbody>
+            </table>
+        </div>
+        
+        <!-- Añadir el div de convenios disponibles -->
+        <div id="convenios-disponibles-estudiante" class="hidden">
+            <h3>Convenios Disponibles</h3>
+            <table class="status-table">
+                <thead>
+                    <tr>
+                        <th>Universidad</th>
+                        <th>Información</th>
+                    </tr>
+                </thead>
+                <tbody id="convenios-list-estudiante"></tbody>
+            </table>
+        </div>
+        
+        <!-- ...resto del dashboard... -->
+    </div>
+
+    <!-- Cambiar de profesor-dashboard a teacher-dashboard -->
+    <div id="teacher-dashboard" class="container hidden">
+        <button class="button logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+        <h2>Panel de Profesor</h2>
+        <div class="button-group">
+            <button class="button" onclick="mostrarFormulario('intercambio-form')">Solicitar Intercambio</button>
+            <button class="button" onclick="mostrarFormulario('convenios-disponibles')">Ver Convenios Disponibles</button>
+        </div>
+        
+        <div id="intercambio-form" class="hidden">
+            <h3>Solicitar Intercambio</h3>
+            <form id="form-intercambio">
+                <div class="form-group">
+                    <label for="uniDestinoProfesor">Universidad de Destino:</label>
+                    <select id="uniDestinoProfesor" required>
+                        <option value="">Seleccione Universidad</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="duracionProfesor">Duración:</label>
+                    <select id="duracionProfesor" required>
+                        <option value="">Seleccione duración</option>
+                        <option value="primer_cuatrimestre">Primer cuatrimestre</option>
+                        <option value="segundo_cuatrimestre">Segundo cuatrimestre</option>
+                        <option value="curso_completo">Curso completo</option>
+                    </select>
+                </div>
+                <button type="submit" class="button">Enviar Solicitud</button>
+            </form>
+        </div>
+
+        <div id="convenios-disponibles" class="hidden">
+            <h3>Convenios Disponibles</h3>
+            <table class="status-table">
+                <thead>
+                    <tr>
+                        <th>Universidad</th>
+                        <th>Información</th>
+                    </tr>
+                </thead>
+                <tbody id="convenios-list-profesor"></tbody>
+            </table>
+        </div>
+
+        <div class="status-section">
+            <h3>Mis Solicitudes</h3>
+            <table class="status-table">
+                <thead>
+                    <tr>
+                        <th>Universidad</th>
+                        <th>Duración</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="solicitudes-list-profesor"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+    <script>
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Login form
+            document.getElementById('login-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                try {
+                    console.log('Enviando solicitud de login...'); // Debug
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+                    
+                    const result = await response.json();
+                    console.log('Respuesta del servidor:', result); // Debug
+
+                    if (result.success) {
+                        // Guardar datos de usuario
+                        sessionStorage.setItem('usuario', JSON.stringify({
+                            id: result.id,
+                            username: result.username,
+                            tipo: result.tipo
+                        }));
+
+                        // Ocultar todos los contenedores
+                        const containers = document.querySelectorAll('.container');
+                        containers.forEach(cont => {
+                            console.log('Ocultando contenedor:', cont.id);
+                            cont.classList.add('hidden');
+                        });
+
+                        // Mostrar el dashboard correspondiente
+                        const dashboardId = `${result.tipo}-dashboard`;
+                        console.log('Intentando mostrar dashboard:', dashboardId);
+                        
+                        const dashboard = document.getElementById(dashboardId);
+                        if (!dashboard) {
+                            throw new Error(`Dashboard no encontrado: ${dashboardId}`);
+                        }
+
+                        dashboard.classList.remove('hidden');
+                        console.log('Dashboard mostrado:', dashboardId);
+
+                        // Cargar los datos específicos
+                        await cargarDatosDashboard(result.tipo);
+                    } else {
+                        mostrarError(result.mensaje || 'Error de autenticación');
+                    }
+                } catch (error) {
+                    console.error('Error completo:', error);
+                    mostrarError('Error: ' + error.message);
+                }
+            });
+
+            // Convenio form
+            document.getElementById('form-convenio').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                console.log('Formulario enviado'); // Debug
+
+                // Validación inicial
+                const uniDestino = document.getElementById('uniDestino').value.trim();
+                if (!uniDestino) {
+                    mostrarError('La universidad destino es requerida');
+                    return;
+                }
+
+                // Obtener todos los pares de asignaturas
+                const pares = Array.from(document.querySelectorAll('#asignaturas-container .asignatura-pair'));
+                if (pares.length < 1) {
+                    mostrarError('Debe incluir al menos un par de asignaturas');
+                    return;
+                }
+
+                // Crear el objeto de datos
+                const formData = {
+                    uniDestino: uniDestino,
+                    asignaturas: pares.map(par => ({
+                        origen: par.querySelector('input[placeholder="Asignatura Origen"]').value.trim(),
+                        destino: par.querySelector('input[placeholder="Asignatura Destino"]').value.trim()
+                    }))
+                };
+
+                // Validar que no haya campos vacíos
+                const camposVacios = formData.asignaturas.some(asig => !asig.origen || !asig.destino);
+                if (camposVacios) {
+                    mostrarError('Todos los campos de asignaturas son obligatorios');
+                    return;
+                }
+
+                console.log('Datos a enviar:', formData); // Debug
+
+                try {
+                    const response = await fetch('/api/convenios', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    console.log('Respuesta del servidor:', result); // Debug
+                    
+                    if (result.success) {
+                        mostrarExito('Convenio creado exitosamente');
+                        // Resetear el formulario
+                        e.target.reset();
+                        document.getElementById('asignaturas-container').innerHTML = `
+                            <div class="asignatura-pair">
+                                <input type="text" placeholder="Asignatura Origen" required>
+                                <input type="text" placeholder="Asignatura Destino" required>
+                                <button type="button" class="button remove-pair" onclick="eliminarParAsignaturas(this)">
+                                    Eliminar
+                                </button>
+                            </div>
+                        `;
+                        await cargarConvenios();
+                    } else {
+                        mostrarError(result.mensaje || 'Error al crear convenio');
+                    }
+                } catch (error) {
+                    console.error('Error completo:', error);
+                    mostrarError('Error al crear convenio: ' + error.message);
+                }
+            });
+        });
+
+        // Funciones auxiliares
+        async function cargarDatos(tipo) {
+            console.log('Cargando datos para tipo:', tipo); // Debug
+            try {
+                switch(tipo) {
+                    case 'admin':
+                        await cargarConvenios();
+                        break;
+                    case 'estudiante':
+                        await cargarConvenios();
+                        await cargarSolicitudes('solicitudes-list-estudiante');
+                        break;
+                    case 'profesor':
+                        await cargarConvenios();
+                        await cargarSolicitudes('solicitudes-list-profesor');
+                        break;
+                    default:
+                        console.error('Tipo de usuario no reconocido:', tipo);
+                }
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+                mostrarError('Error al cargar los datos');
+            }
+        }
+
+        function mostrarFormulario(formId) {
+            document.getElementById(formId).classList.toggle('hidden');
+        }
+
+        async function cargarDatos(tipo) {
+            console.log('Cargando datos para:', tipo); // Debug
+            if (tipo === 'admin') {
+                await cargarConvenios();
+            } else if (tipo === 'estudiante') {
+                await cargarConvenios(); // Cargar convenios disponibles
+                await cargarSolicitudes('solicitudes-list-estudiante');
+            } else if (tipo === 'profesor') {
+                await cargarConvenios(); // Cargar convenios disponibles
+                await cargarSolicitudes('solicitudes-list-profesor');
+            }
+        }
+
+        async function cargarConvenios() {
+            try {
+                const response = await fetch('/api/convenios');
+                const data = await response.json();
+                if (data.success) {
+                    actualizarListaConvenios(data.convenios);
+                }
+            } catch (error) {
+                console.error('Error cargando convenios:', error);
+                alert('Error al cargar convenios');
+            }
+        }
+
+        function actualizarListaConvenios(convenios) {
+            const listas = [
+                document.getElementById('convenios-list'),
+                document.getElementById('convenios-list-profesor'),
+                document.getElementById('convenios-list-estudiante')
+            ];
+            
+            listas.forEach(lista => {
+                if (!lista) return;
+
+                const isAdmin = lista.id === 'convenios-list';
+                lista.innerHTML = convenios.map(convenio => `
+                    <tr>
+                        <td>${convenio.uniDestino}</td>
+                        <td>${convenio.asignaturas ? convenio.asignaturas.map(a => 
+                            `${a.origen} → ${a.destino}`).join('<br>') : ''}</td>
+                        ${isAdmin ? `
+                            <td>
+                                <button onclick="eliminarConvenio(${convenio.id})" class="button">Eliminar</button>
+                            </td>
+                        ` : ''}
+                    </tr>
+                `).join('');
+            });
+        }
+
+        // Nueva función para mostrar asignaturas del convenio seleccionado
+        function mostrarAsignaturasConvenio(asignaturas) {
+            const containers = document.querySelectorAll('.asignatura-pair');
+            containers.forEach(container => {
+                if (container) {
+                    container.innerHTML = `
+                        <div class="asignaturas-list">
+                            ${asignaturas.map(asig => `
+                                <div class="asignatura-option">
+                                    <input type="checkbox" name="asignatura" value='${JSON.stringify(asig)}' id="asig-${asig.origen}">
+                                    <label for="asig-${asig.origen}">${asig.origen} → ${asig.destino}</label>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="validation-message"></div>
+                    `;
+
+                    // Añadir validación para asegurar que se seleccione al menos una asignatura
+                    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+                    checkboxes.forEach(cb => {
+                        cb.addEventListener('change', () => {
+                            const checked = container.querySelectorAll('input[type="checkbox"]:checked').length;
+                            const message = container.querySelector('.validation-message');
+                            if (checked === 0) {
+                                message.textContent = 'Debe seleccionar al menos una asignatura';
+                                message.style.color = 'red';
+                            } else {
+                                message.textContent = '';
+                            }
+                        });
+                    });
+                }
+            });
+        }
+
+        // Actualizar los formularios de solicitud
+        document.getElementById('form-convalidacion')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = {
+                tipo: 'convalidacion',
+                uniDestino: document.getElementById('uniDestinoEstudiante').value,
+                duracion: document.getElementById('duracionEstudiante').value,
+                asignaturas: Array.from(document.querySelectorAll('#asignaturas-convenio-estudiante input[name="asignatura"]:checked'))
+                    .map(cb => JSON.parse(cb.value))
+            };
+
+            if (!formData.asignaturas.length) {
+                mostrarError('Debe seleccionar al menos una asignatura');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/solicitudes/convalidacion', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    mostrarExito('Solicitud de convalidación enviada exitosamente');
+                    document.getElementById('convalidacion-form').classList.add('hidden');
+                    e.target.reset();
+                    await cargarSolicitudes('solicitudes-list-estudiante');
+                } else {
+                    mostrarError(result.mensaje || 'Error al enviar solicitud');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarError('Error al enviar solicitud: ' + error.message);
+            }
+        });
+
+        document.getElementById('form-intercambio')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const uniDestino = document.getElementById('uniDestinoProfesor').value;
+            
+            if (!uniDestino) {
+                mostrarError('Debe seleccionar una universidad');
+                return;
+            }
+        
+            const formData = {
+                tipo: 'intercambio',
+                uniDestino: uniDestino,
+                duracion: document.getElementById('duracionProfesor').value
+            };
+        
+            try {
+                const response = await fetch('/api/solicitudes/intercambio', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+        
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+        
+                const result = await response.json();
+                if (result.success) {
+                    mostrarExito('Solicitud de intercambio enviada exitosamente');
+                    document.getElementById('intercambio-form').classList.add('hidden');
+                    e.target.reset();
+                    await cargarSolicitudes('solicitudes-list-profesor');
+                } else {
+                    mostrarError(result.mensaje || 'Error al enviar solicitud');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarError('Error al enviar solicitud: ' + error.message);
+            }
+        });
+
+        async function eliminarConvenio(id) {
+            if (!confirm('¿Está seguro de eliminar este convenio?')) return;
+            
+            try {
+                const response = await fetch(`/api/convenios/${id}`, {
+                    method: 'DELETE'
+                });
+                const resultado = await response.json();
+                
+                if (resultado.success) {
+                    mostrarExito('Convenio eliminado correctamente');
+                    cargarDatos('admin');
+                } else {
+                    mostrarError(resultado.mensaje);
+                }
+            } catch (error) {
+                mostrarError('Error al eliminar el convenio');
+            }
+        }
+
+        function agregarParAsignaturas(tipo = '') {
+            // Determinar el contenedor correcto basado en el tipo de usuario
+            let containerId;
+            switch(tipo) {
+                case 'estudiante':
+                    containerId = 'asignaturas-container-estudiante';
+                    break;
+                case 'profesor':
+                    containerId = 'asignaturas-container-profesor';
+                    break;
+                default:
+                    containerId = 'asignaturas-container';
+            }
+            
+            const container = document.getElementById(containerId);
+            if (!container) {
+                console.error(`Contenedor no encontrado: ${containerId}`);
+                return;
+            }
+
+            const nuevoPar = document.createElement('div');
+            nuevoPar.className = 'asignatura-pair';
+            nuevoPar.innerHTML = `
+                <input type="text" placeholder="Asignatura Origen" required>
+                <input type="text" placeholder="Asignatura Destino" required>
+                <button type="button" class="button remove-pair" onclick="eliminarParAsignaturas(this, '${tipo}')">
+                    Eliminar
+                </button>
+            `;
+            container.appendChild(nuevoPar);
+        }
+
+        function eliminarParAsignaturas(button, tipo = '') {
+            // Determinar el contenedor correcto basado en el tipo de usuario
+            let containerId;
+            switch(tipo) {
+                case 'estudiante':
+                    containerId = 'asignaturas-container-estudiante';
+                    break;
+                case 'profesor':
+                    containerId = 'asignaturas-container-profesor';
+                    break;
+                default:
+                    containerId = 'asignaturas-container';
+            }
+            
+            const container = document.getElementById(containerId);
+            const totalPares = container.getElementsByClassName('asignatura-pair').length;
+            
+            if (totalPares <= 1) {
+                mostrarError('Debe mantener al menos un par de asignaturas');
+                return;
+            }
+            button.closest('.asignatura-pair').remove();
+        }
+
+        async function solicitarConvalidacion(event) {
+            event.preventDefault();
+            const solicitudData = {
+                uniDestino: document.getElementById('studentUniDestinoSelect').value,
+                asignaturas: Array.from(document.getElementById('studentAsignaturasSelect').selectedOptions)
+                    .map(opt => JSON.parse(opt.value))
+            };
+
+            try {
+                const response = await fetch('/api/solicitudes/convalidacion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(solicitudData)
+                });
+                
+                const resultado = await response.json();
+                if (resultado.success) {
+                    alert('Solicitud enviada exitosamente');
+                    event.target.reset();
+                    cargarDatos('estudiante');
+                } else {
+                    alert(resultado.mensaje || 'Error al enviar solicitud');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al enviar solicitud');
+            }
+        }
+
+        async function solicitarIntercambio(event) {
+            event.preventDefault();
+            const solicitudData = {
+                uniDestino: document.getElementById('teacherUniDestinoSelect').value,
+                asignaturas: Array.from(document.getElementById('teacherAsignaturasSelect').selectedOptions)
+                    .map(opt => JSON.parse(opt.value))
+            };
+
+            try {
+                const response = await fetch('/api/solicitudes/intercambio', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(solicitudData)
+                });
+                
+                const resultado = await response.json();
+                if (resultado.success) {
+                    alert('Solicitud enviada exitosamente');
+                    event.target.reset();
+                    cargarDatos('profesor');
+                } else {
+                    alert(resultado.mensaje || 'Error al enviar solicitud');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al enviar solicitud');
+            }
+        }
+
+        async function cerrarSesion() {
+            try {                await fetch('/api/logout', { method: 'POST' });                document.querySelectorAll('.container').forEach(cont => cont.classList.add('hidden'));                document.getElementById('login-section').classList.remove('hidden');                document.getElementById('username').value = '';                document.getElementById('password').value = '';            } catch (error) {                mostrarError('Error al cerrar sesión');            }
+        }
+
+        function mostrarError(mensaje) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = mensaje;
+            document.body.appendChild(errorDiv);
+            setTimeout(() => errorDiv.remove(), 3000);
+        }
+
+        function mostrarExito(mensaje) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.textContent = mensaje;
+            document.body.appendChild(successDiv);
+            setTimeout(() => successDiv.remove(), 3000);
+        }
+
+        // Funciones para manejar solicitudes
+        async function cargarSolicitudes(listaId) {
+            try {
+                const response = await fetch('/api/solicitudes');
+                const { solicitudes } = await response.json();
+                actualizarListaSolicitudes(solicitudes, listaId);
+            } catch (error) {
+                console.error('Error completo:', error); // Debug
+                mostrarError('Error al cargar solicitudes');
+            }
+        }
+
+        function actualizarListaSolicitudes(solicitudes, listaId) {
+            const lista = document.getElementById(listaId);
+            if (!lista) return;
+
+            // Limpiar lista existente
+            lista.innerHTML = '';
+            
+            // Crear un Set para controlar duplicados
+            const procesadas = new Set();
+
+            solicitudes.forEach(solicitud => {
+                // Si ya procesamos esta solicitud, la saltamos
+                if (procesadas.has(solicitud.id)) return;
+                procesadas.add(solicitud.id);
+
+                const esEstudiante = listaId === 'solicitudes-list-estudiante';
+                const duracionTexto = {
+                    'primer_cuatrimestre': 'Primer cuatrimestre',
+                    'segundo_cuatrimestre': 'Segundo cuatrimestre',
+                    'curso_completo': 'Curso completo'
+                }[solicitud.duracion] || 'No especificado';
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${solicitud.uniDestino}</td>
+                    <td>${duracionTexto}</td>
+                    ${esEstudiante ? `<td>${solicitud.asignaturas.join('<br>')}</td>` : ''}
+                    <td>${solicitud.estado}</td>
+                `;
+                
+                lista.appendChild(row);
+            });
+        }
+
+        // Funciones para asignaturas
+        async function cargarAsignaturas(centroId) {
+            try {
+                const response = await fetch(`/api/asignaturas/${centroId}`);
+                const { asignaturas } = await response.json();
+                actualizarSelectAsignaturas(asignaturas);
+            } catch (error) {
+                mostrarError('Error al cargar asignaturas');
+            }
+        }
+
+        function actualizarSelectAsignaturas(asignaturas) {
+            const selects = document.querySelectorAll('.asignaturas-select');
+            selects.forEach(select => {
+                select.innerHTML = '<option value="">Seleccione Asignatura</option>';
+                asignaturas.forEach(asig => {
+                    select.add(new Option(asig.nombre, asig.id));
+                });
+            });
+        }
+
+        // Funciones para validación
+        function validarFormulario(form) {
+            const inputs = form.querySelectorAll('input[required], select[required]');
+            for (let input of inputs) {
+                if (!input.value.trim()) {
+                    mostrarError(`El campo ${input.placeholder || input.name} es obligatorio`);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Añadir la función para cargar convenios disponibles si no existe
+        async function cargarConveniosDisponibles() {
+            try {
+                const response = await fetch('/api/convenios');
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Actualizar la lista de convenios disponibles
+                    actualizarListaConvenios(data.convenios);
+                    
+                    // Actualizar el select de universidades
+                    const selectUni = document.getElementById('uniDestinoEstudiante') || 
+                                    document.getElementById('uniDestinoProfesor');
+                    
+                    if (selectUni) {
+                        selectUni.innerHTML = '<option value="">Seleccione Universidad</option>' +
+                            data.convenios.map(conv => 
+                                `<option value="${conv.id}">${conv.uniDestino}</option>`
+                            ).join('');
+                    }
+
+                    // Actualizar la lista de convenios si está visible
+                    const listaConvenios = document.getElementById('convenios-list-profesor');
+                    if (listaConvenios) {
+                        listaConvenios.innerHTML = data.convenios.map(convenio => `
+                            <tr>
+                                <td>${convenio.uniDestino}</td>
+                                <td>${convenio.asignaturas.length} asignatura(s) disponible(s)</td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Error cargando convenios disponibles:', error);
+                mostrarError('Error al cargar convenios disponibles');
+            }
+        }
+
+        // Nueva función para cargar datos específicos del dashboard
+        async function cargarDatosDashboard(tipo) {
+            console.log('Cargando datos para dashboard:', tipo); // Debug log
+            try {
+                switch(tipo) {
+                    case 'admin':
+                        await cargarConvenios();
+                        break;
+                    case 'student':
+                    case 'teacher':
+                        await Promise.all([
+                            cargarConveniosDisponibles(),
+                            cargarSolicitudes(`solicitudes-list-${tipo}`)
+                        ]);
+                        break;
+                    default:
+                        console.error('Tipo de usuario no reconocido:', tipo);
+                }
+            } catch (error) {
+                console.error('Error cargando datos del dashboard:', error);
+                mostrarError('Error al cargar los datos');
+            }
+        }
+
+        // Añadir función para mostrar detalles del convenio seleccionado
+        function mostrarDetallesConvenio(convenioId, tipo) {
+            const detallesDiv = document.getElementById(`detalles-convenio-${tipo}`);
+            if (!detallesDiv || !convenioId) {
+                if (detallesDiv) detallesDiv.innerHTML = '';
+                return;
+            }
+        
+            fetch(`/api/convenios/${convenioId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.convenio) {
+                        detallesDiv.innerHTML = `
+                            <div class="convenio-info">
+                                <p><strong>Universidad:</strong> ${data.convenio.uniDestino}</p>
+                                <p><strong>Asignaturas disponibles:</strong> ${data.convenio.asignaturas.length}</p>
+                                <div class="asignaturas-list">
+                                    ${data.convenio.asignaturas.map(asig => `
+                                        <div class="asignatura-info">
+                                            ${asig.origen} → ${asig.destino}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    detallesDiv.innerHTML = '<p class="error">Error al cargar detalles del convenio</p>';
+                });
+        }
+
+        async function cargarAsignaturasConvenio(convenioId, tipo) {
+            if (!convenioId) return;
+
+            try {
+                const response = await fetch(`/api/convenios/${convenioId}`);
+                const data = await response.json();
+                
+                if (data.success && data.convenio) {
+                    const container = document.getElementById(`asignaturas-convenio-${tipo}`);
+                    container.innerHTML = `
+                        <h4>Asignaturas Disponibles:</h4>
+                        <div class="asignaturas-list">
+                            ${data.convenio.asignaturas.map(asig => `
+                                <div class="asignatura-option">
+                                    <input type="checkbox" name="asignatura" 
+                                           value='${JSON.stringify(asig)}' 
+                                           id="asig-${asig.origen.replace(/\s+/g, '-')}">
+                                    <label for="asig-${asig.origen.replace(/\s+/g, '-')}">
+                                        ${asig.origen} → ${asig.destino}
+                                    </label>
+                                </div>
+                            `).join('')}
+                        </div>`;
+                    container.classList.remove('hidden');
+                } else {
+                    mostrarError('Error al obtener asignaturas del convenio');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarError('Error al cargar asignaturas');
+            }
+        }
+
+        // Nueva función para cargar datos específicos del dashboard
+        async function cargarDatosDashboard(tipo) {
+            console.log('Cargando datos para dashboard:', tipo); // Debug log
+            try {
+                switch(tipo) {
+                    case 'admin':
+                        await cargarConvenios();
+                        break;
+                    case 'student':
+                    case 'teacher':
+                        await Promise.all([
+                            cargarConveniosDisponibles(),
+                            cargarSolicitudes(`solicitudes-list-${tipo}`)
+                        ]);
+                        break;
+                    default:
+                        console.error('Tipo de usuario no reconocido:', tipo);
+                }
+            } catch (error) {
+                console.error('Error cargando datos del dashboard:', error);
+                mostrarError('Error al cargar los datos');
+            }
+        }
+
+        // Modificar el manejador del formulario de convalidación para estudiantes
+        document.getElementById('form-convalidacion')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const uniDestino = document.getElementById('uniDestinoEstudiante').value;
+            const duracion = document.getElementById('duracionEstudiante').value;
+
+            if (!uniDestino || !duracion) {
+                mostrarError('Debe seleccionar universidad y duración');
+                return;
+            }
+
+            // Obtener las asignaturas del convenio automáticamente
+            const response = await fetch(`/api/convenios/${uniDestino}`);
+            const data = await response.json();
+            
+            const formData = {
+                tipo: 'convalidacion',
+                uniDestino: uniDestino,
+                duracion: duracion
+            };
+
+            try {
+                const response = await fetch('/api/solicitudes/convalidacion', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    mostrarExito('Solicitud de convalidación enviada exitosamente');
+                    document.getElementById('convalidacion-form').classList.add('hidden');
+                    e.target.reset();
+                    await cargarSolicitudes('solicitudes-list-estudiante');
+                } else {
+                    mostrarError(result.mensaje || 'Error al enviar solicitud');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarError('Error al enviar solicitud: ' + error.message);
+            }
+        });
+
+        // Modificar el manejador del formulario de intercambio para profesores
+        document.getElementById('form-intercambio')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const uniDestino = document.getElementById('uniDestinoProfesor').value;
+            
+            if (!uniDestino) {
+                mostrarError('Debe seleccionar una universidad');
+                return;
+            }
+
+            const formData = {
+                tipo: 'intercambio',
+                uniDestino: uniDestino,
+                asignaturas: [] // Asegurarse de que asignaturas esté definido
+            };
+
+            try {
+                const response = await fetch('/api/solicitudes/intercambio', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+
+                const result = await response.json();
+                if (result.success) {
+                    mostrarExito('Solicitud de intercambio enviada exitosamente');
+                    document.getElementById('intercambio-form').classList.add('hidden');
+                    e.target.reset();
+                    await cargarSolicitudes('solicitudes-list-profesor');
+                } else {
+                    mostrarError(result.mensaje || 'Error al enviar solicitud');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarError('Error al enviar solicitud: ' + error.message);
+            }
+        });
+
+        // Modificar la función cargarConveniosDisponibles
+        async function cargarConveniosDisponibles() {
+            try {
+                const response = await fetch('/api/convenios');
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Actualizar los selectores de universidad para profesor y estudiante
+                    const selectores = ['uniDestinoProfesor', 'uniDestinoEstudiante'];
+                    selectores.forEach(selectorId => {
+                        const select = document.getElementById(selectorId);
+                        if (select) {
+                            select.innerHTML = '<option value="">Seleccione Universidad</option>' +
+                                data.convenios.map(conv => 
+                                    `<option value="${conv.uniDestino}">${conv.uniDestino}</option>`
+                                ).join('');
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error cargando convenios:', error);
+                mostrarError('Error al cargar universidades disponibles');
+            }
+        }
+
+        // Modificar el manejador del formulario de convalidación
+        document.getElementById('form-convalidacion')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const uniDestino = document.getElementById('uniDestinoEstudiante').value;
+            const duracion = document.getElementById('duracionEstudiante').value;
+
+            if (!uniDestino || !duracion) {
+                mostrarError('Debe seleccionar universidad y duración');
+                return;
+            }
+
+            const formData = {
+                tipo: 'convalidacion',
+                uniDestino: uniDestino,
+                duracion: duracion
+            };
+
+            try {
+                const response = await fetch('/api/solicitudes/convalidacion', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    mostrarExito('Solicitud de convalidación enviada exitosamente');
+                    document.getElementById('convalidacion-form').classList.add('hidden');
+                    e.target.reset();
+                    await cargarSolicitudes('solicitudes-list-estudiante');
+                } else {
+                    mostrarError(result.mensaje || 'Error al enviar solicitud');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarError('Error al enviar solicitud: ' + error.message);
+            }
+        });
+
+        // Reemplazar el event listener del formulario de intercambio
+        document.getElementById('form-intercambio')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = {
+                tipo: 'intercambio',
+                uniDestino: document.getElementById('uniDestinoProfesor').value,
+                duracion: document.getElementById('duracionProfesor').value
+            };
+
+            if (!formData.uniDestino || !formData.duracion) {
+                mostrarError('Debe seleccionar universidad y duración');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/solicitudes/intercambio', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    mostrarExito('Solicitud de intercambio enviada exitosamente');
+                    document.getElementById('intercambio-form').classList.add('hidden');
+                    e.target.reset();
+                    await cargarSolicitudes('solicitudes-list-profesor');
+                } else {
+                    mostrarError(result.mensaje || 'Error al enviar solicitud');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarError('Error al enviar solicitud');
+            }
+        });
+    </script>
+</body>
+</html>
