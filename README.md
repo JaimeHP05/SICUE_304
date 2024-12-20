@@ -20,8 +20,8 @@ Sistema de gestión de intercambios universitarios y convalidaciones para la Uni
 ## Instalación
 
 1. Clonar el repositorio:
-git clone https://github.com/tu-usuario/sistema-sicue.git
-cd sistema-sicue
+git clone (https://github.com/JaimeHP05/SICUE_304)
+cd sicue
 
 2. Instalar dependencias:
 npm install
